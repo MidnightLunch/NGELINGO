@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ngelingo - Learn Swahili the Smart Way</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #3c3c3c;
+            overflow-x: hidden;
+        }
+
+        /* Duolingo-style header */
+        .header {
+            background: #ffffff;
+            border-bottom: 2px solid #e5e5e5;
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #58cc02;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #666;
+        }
+
+        .hearts { color: #ff4b4b; }
+        .streak { color: #ff9600; }
+        .gems { color: #1cb0f6; }
+
+        /* Main container */
+        .main-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Progress bar */
+        .progress-container {
+            margin-bottom: 32px;
+        }
+
+        .progress-bar {
+            height: 16px;
+            background: #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58cc02, #7ce03e);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 12px;
+        }
+
+        /* Challenge card */
+        .challenge-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            border: 2px solid #e5e5e5;
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .challenge-icon {
+            width: 48px;
+            height: 48px;
+            background: #58cc02;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .challenge-title h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #3c3c3c;
+            margin-bottom: 4px;
+        }
+
+        .challenge-title p {
+            font-size: 16px;
+            color: #777;
+        }
+
+        /* Sentence workspace */
+        .sentence-workspace {
+            background: #f7f7f7;
+            border: 2px dashed #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sentence-workspace.drag-over {
+            border-color: #58cc02;
+            background: #f0fce8;
+        }
+
+        .sentence-placeholder {
+            color: #999;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Morpheme sections */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f7f7f7;
+            border-radius: 12px;
+        }
+
+        .section-number {
+            width: 32px;
+            height: 32px;
+            background: #58cc02;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .section-label {
+            font-weight: 700;
+            color: #3c3c3c;
+            font-size: 16px;
+        }
+
+        .morpheme-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* Morpheme styling */
+        .morpheme {
+            background: #ffffff;
+            border: 2px solid #e5e5e5;
+            border-bottom: 4px solid #d4d4d4;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #3c3c3c;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .morpheme:hover {
+            transform: translateY(-2px);
+            border-bottom-width: 6px;
+        }
+
+        .morpheme:active {
+            cursor: grabbing;
+            transform: translateY(0);
+            border-bottom-width: 2px;
+        }
+
+        .morpheme.in-sentence {
+            background: #58cc02;
+            color: white;
+            border-color: #4cac01;
+            border-bottom-color: #3e8e01;
+            cursor: pointer;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Color coding */
+        .subject-prefix { border-left: 6px solid #ff4b4b; }
+        .tense-marker { border-left: 6px solid #ffc800; }
+        .object-prefix { border-left: 6px solid #1cb0f6; }
+        .verb-root { border-left: 6px solid #58cc02; }
+
+        /* Tooltip */
+        .morpheme-tooltip {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3c3c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .morpheme-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #3c3c3c;
+        }
+
+        .morpheme:hover .morpheme-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        /* Control buttons */
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 4px solid;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        .check-btn {
+            background: #58cc02;
+            color: white;
+            border-bottom-color: #4cac01;
+        }
+
+        .check-btn:hover:not(:disabled) {
+            background: #4cac01;
+        }
+
+        .check-btn:disabled {
+            background: #e5e5e5;
+            color: #999;
+            border-bottom-color: #d4d4d4;
+            cursor: not-allowed;
+        }
+
+        .skip-btn {
+            background: #ffffff;
+            color: #1cb0f6;
+            border: 2px solid #e5e5e5;
+            border-bottom-width: 4px;
+            border-bottom-color: #d4d4d4;
+        }
+
+        .skip-btn:hover {
+            background: #f7f7f7;
+        }
+
+        /* Hint button */
+        .hint-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #ffc800;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border-bottom: 4px solid #e5b100;
+        }
+
+        .hint-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .hint-btn:active {
+            transform: translateY(0);
+            border-bottom-width: 2px;
+        }
+
+        /* Feedback modal */
+        .feedback-modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .feedback-modal.show {
+            transform: translateY(0);
+        }
+
+        .feedback-modal.correct {
+            background: #d7ffb8;
+        }
+
+        .feedback-modal.incorrect {
+            background: #ffdfe0;
+        }
+
+        .feedback-content {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .feedback-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feedback-modal.correct .feedback-title {
+            color: #58a700;
+        }
+
+        .feedback-modal.incorrect .feedback-title {
+            color: #ea2b2b;
+        }
+
+        .feedback-explanation {
+            font-size: 16px;
+            color: #3c3c3c;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .continue-btn {
+            background: #58cc02;
+            color: white;
+            padding: 16px 48px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 4px solid #4cac01;
+        }
+
+        .continue-btn:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        /* Hint display */
+        .hint-display {
+            background: #fff3cd;
+            border: 2px solid #ffc800;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: none;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .hint-display.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Combo display */
+        .combo-display {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #ff9600;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 18px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .combo-display.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .header-stats span:not(.icon) { display: none; }
+            .morpheme { padding: 10px 16px; font-size: 16px; }
+            .controls {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 16px;
+                background: white;
+                box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+                margin: 0;
+            }
+            .main-container { padding-bottom: 100px; }
+            .hint-btn { bottom: 90px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <span style="font-size: 36px;">🦒</span>
+                Ngelingo
+            </a>
+            <div class="header-stats">
+                <div class="stat-item hearts">
+                    <span class="icon">❤️</span>
+                    <span id="hearts">5</span>
+                </div>
+                <div class="stat-item streak">
+                    <span class="icon">🔥</span>
+                    <span id="streak">0</span>
+                </div>
+                <div class="stat-item gems">
+                    <span class="icon">💎</span>
+                    <span id="gems">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <div class="main-container">
+        <!-- Progress bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Challenge card -->
+        <div class="challenge-card">
+            <div class="challenge-header">
+                <div class="challenge-icon">🔧</div>
+                <div class="challenge-title">
+                    <h2>Build the sentence</h2>
+                    <p id="challengeText">"I see you"</p>
+                </div>
+            </div>
+
+            <!-- Hint display -->
+            <div class="hint-display" id="hintDisplay"></div>
+
+            <!-- Sentence workspace -->
+            <div class="sentence-workspace" id="sentenceWorkspace" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="sentence-placeholder" id="placeholder">Drag morphemes here to build your sentence</div>
+            </div>
+
+            <!-- Morpheme sections -->
+            <div class="morpheme-sections">
+                <!-- Subject -->
+                <div class="section-header">
+                    <div class="section-number">1</div>
+                    <div class="section-label">WHO does it? (Subject)</div>
+                </div>
+                <div class="morpheme-pool">
+                    <div class="morpheme subject-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="ni-" data-meaning="I" data-type="subject">
+                        ni-
+                        <div class="morpheme-tooltip">I (subject)</div>
+                    </div>
+                    <div class="morpheme subject-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="u-" data-meaning="you" data-type="subject">
+                        u-
+                        <div class="morpheme-tooltip">you (subject)</div>
+                    </div>
+                    <div class="morpheme subject-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="a-" data-meaning="he/she" data-type="subject">
+                        a-
+                        <div class="morpheme-tooltip">he/she (subject)</div>
+                    </div>
+                    <div class="morpheme subject-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="tu-" data-meaning="we" data-type="subject">
+                        tu-
+                        <div class="morpheme-tooltip">we (subject)</div>
+                    </div>
+                </div>
+
+                <!-- Tense -->
+                <div class="section-header">
+                    <div class="section-number">2</div>
+                    <div class="section-label">WHEN does it happen? (Tense)</div>
+                </div>
+                <div class="morpheme-pool">
+                    <div class="morpheme tense-marker" draggable="true" ondragstart="drag(event)" data-morpheme="-na-" data-meaning="present" data-type="tense">
+                        -na-
+                        <div class="morpheme-tooltip">now (present)</div>
+                    </div>
+                    <div class="morpheme tense-marker" draggable="true" ondragstart="drag(event)" data-morpheme="-li-" data-meaning="past" data-type="tense">
+                        -li-
+                        <div class="morpheme-tooltip">before (past)</div>
+                    </div>
+                    <div class="morpheme tense-marker" draggable="true" ondragstart="drag(event)" data-morpheme="-ta-" data-meaning="future" data-type="tense">
+                        -ta-
+                        <div class="morpheme-tooltip">will (future)</div>
+                    </div>
+                    <div class="morpheme tense-marker" draggable="true" ondragstart="drag(event)" data-morpheme="-me-" data-meaning="perfect" data-type="tense">
+                        -me-
+                        <div class="morpheme-tooltip">have done (perfect)</div>
+                    </div>
+                </div>
+
+                <!-- Object -->
+                <div class="section-header">
+                    <div class="section-number">3</div>
+                    <div class="section-label">WHO receives it? (Object - Optional)</div>
+                </div>
+                <div class="morpheme-pool">
+                    <div class="morpheme object-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="-ku-" data-meaning="you (obj)" data-type="object">
+                        -ku-
+                        <div class="morpheme-tooltip">you (object)</div>
+                    </div>
+                    <div class="morpheme object-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="-m-" data-meaning="him/her" data-type="object">
+                        -m-
+                        <div class="morpheme-tooltip">him/her (object)</div>
+                    </div>
+                    <div class="morpheme object-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="-ni-" data-meaning="me" data-type="object">
+                        -ni-
+                        <div class="morpheme-tooltip">me (object)</div>
+                    </div>
+                    <div class="morpheme object-prefix" draggable="true" ondragstart="drag(event)" data-morpheme="-tu-" data-meaning="us" data-type="object">
+                        -tu-
+                        <div class="morpheme-tooltip">us (object)</div>
+                    </div>
+                </div>
+
+                <!-- Verb -->
+                <div class="section-header">
+                    <div class="section-number">4</div>
+                    <div class="section-label">WHAT action? (Verb)</div>
+                </div>
+                <div class="morpheme-pool">
+                    <div class="morpheme verb-root" draggable="true" ondragstart="drag(event)" data-morpheme="-ona" data-meaning="see" data-type="verb">
+                        -ona
+                        <div class="morpheme-tooltip">to see</div>
+                    </div>
+                    <div class="morpheme verb-root" draggable="true" ondragstart="drag(event)" data-morpheme="-penda" data-meaning="love" data-type="verb">
+                        -penda
+                        <div class="morpheme-tooltip">to love</div>
+                    </div>
+                    <div class="morpheme verb-root" draggable="true" ondragstart="drag(event)" data-morpheme="-soma" data-meaning="read" data-type="verb">
+                        -soma
+                        <div class="morpheme-tooltip">to read</div>
+                    </div>
+                    <div class="morpheme verb-root" draggable="true" ondragstart="drag(event)" data-morpheme="-enda" data-meaning="go" data-type="verb">
+                        -enda
+                        <div class="morpheme-tooltip">to go</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn skip-btn" onclick="skipChallenge()">SKIP</button>
+            <button class="btn check-btn" id="checkBtn" onclick="checkSentence()" disabled>CHECK</button>
+        </div>
+    </div>
+
+    <!-- Hint button -->
+    <button class="hint-btn" onclick="showHint()">💡</button>
+
+    <!-- Combo display -->
+    <div class="combo-display" id="comboDisplay">
+        🔥 Combo ×<span id="comboValue">2</span>
+    </div>
+
+    <!-- Feedback modal -->
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="feedback-content">
+            <div class="feedback-title" id="feedbackTitle"></div>
+            <div class="feedback-explanation" id="feedbackExplanation"></div>
+            <button class="continue-btn" onclick="continueToNext()">CONTINUE</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            currentChallenge: 0,
+            builtSentence: [],
+            sentenceTypes: [],
+            streak: 0,
+            hearts: 5,
+            gems: 0,
+            combo: 0,
+            totalAttempts: 0,
+            correctAttempts: 0,
+            soundEnabled: true
+        };
+
+        // Challenges
+        const challenges = [
+            {
+                target: "ninakuona",
+                english: "I see you",
+                required: ["ni-", "-na-", "-ku-", "-ona"],
+                explanation: "ni- (I) + -na- (present) + -ku- (you) + -ona (see) = I am seeing you",
+                gems: 10
+            },
+            {
+                target: "unanipenda",
+                english: "You love me",
+                required: ["u-", "-na-", "-ni-", "-penda"],
+                explanation: "u- (you) + -na- (present) + -ni- (me) + -penda (love) = You love me",
+                gems: 10
+            },
+            {
+                target: "anasoma",
+                english: "He/She reads",
+                required: ["a-", "-na-", "-soma"],
+                explanation: "a- (he/she) + -na- (present) + -soma (read) = He/She is reading",
+                gems: 10
+            },
+            {
+                target: "tulimwona",
+                english: "We saw him/her",
+                required: ["tu-", "-li-", "-m-", "-ona"],
+                explanation: "tu- (we) + -li- (past) + -m- (him/her) + -ona (see) = We saw him/her",
+                gems: 15
+            },
+            {
+                target: "nitakupenda",
+                english: "I will love you",
+                required: ["ni-", "-ta-", "-ku-", "-penda"],
+                explanation: "ni- (I) + -ta- (future) + -ku- (you) + -penda (love) = I will love you",
+                gems: 15
+            },
+            {
+                target: "tutaenda",
+                english: "We will go",
+                required: ["tu-", "-ta-", "-enda"],
+                explanation: "tu- (we) + -ta- (future) + -enda (go) = We will go",
+                gems: 15
+            },
+            {
+                target: "umesoma",
+                english: "You have read",
+                required: ["u-", "-me-", "-soma"],
+                explanation: "u- (you) + -me- (perfect) + -soma (read) = You have read",
+                gems: 20
+            }
+        ];
+
+        // Sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch(type) {
+                case 'correct':
+                    oscillator.frequency.setValueAtTime(523, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2);
+                    break;
+                case 'incorrect':
+                    oscillator.frequency.setValueAtTime(294, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(277, audioContext.currentTime + 0.15);
+                    break;
+                case 'drag':
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    break;
+            }
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Drag and drop
+        function allowDrop(ev) {
+            ev.preventDefault();
+            document.getElementById('sentenceWorkspace').classList.add('drag-over');
+        }
+
+        function dragLeave(ev) {
+            document.getElementById('sentenceWorkspace').classList.remove('drag-over');
+        }
+
+        function dragLeave(ev) {
+            document.getElementById('sentenceWorkspace').classList.remove('drag-over');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("morpheme", ev.target.dataset.morpheme);
+            ev.dataTransfer.setData("meaning", ev.target.dataset.meaning);
+            ev.dataTransfer.setData("type", ev.target.dataset.type);
+            ev.dataTransfer.setData("class", ev.target.className);
+            playSound('drag');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            document.getElementById('sentenceWorkspace').classList.remove('drag-over');
+            
+            const morpheme = ev.dataTransfer.getData("morpheme");
+            const meaning = ev.dataTransfer.getData("meaning");
+            const type = ev.dataTransfer.getData("type");
+            const className = ev.dataTransfer.getData("class");
+            
+            addMorphemeToSentence(morpheme, meaning, type, className);
+        }
+
+        function addMorphemeToSentence(morpheme, meaning, type, className) {
+            // Hide placeholder
+            const placeholder = document.getElementById('placeholder');
+            if (placeholder) placeholder.style.display = 'none';
+            
+            // Check if type exists (except objects can have multiple)
+            const existingIndex = gameState.sentenceTypes.indexOf(type);
+            if (existingIndex !== -1 && type !== 'object') {
+                // Replace existing
+                gameState.builtSentence[existingIndex] = morpheme;
+                const workspace = document.getElementById('sentenceWorkspace');
+                const morphemes = workspace.querySelectorAll('.morpheme.in-sentence');
+                if (morphemes[existingIndex]) {
+                    morphemes[existingIndex].textContent = morpheme;
+                }
+            } else {
+                // Add new
+                gameState.builtSentence.push(morpheme);
+                gameState.sentenceTypes.push(type);
+                
+                const workspace = document.getElementById('sentenceWorkspace');
+                const morphemeEl = document.createElement('div');
+                morphemeEl.className = className + ' in-sentence';
+                morphemeEl.textContent = morpheme;
+                morphemeEl.onclick = () => removeMorpheme(morphemeEl, morpheme, type);
+                morphemeEl.style.cursor = 'pointer';
+                
+                workspace.appendChild(morphemeEl);
+            }
+            
+            updateCheckButton();
+            playSound('drag');
+        }
+
+        function removeMorpheme(element, morpheme, type) {
+            element.remove();
+            const index = gameState.builtSentence.indexOf(morpheme);
+            if (index > -1) {
+                gameState.builtSentence.splice(index, 1);
+                gameState.sentenceTypes.splice(index, 1);
+            }
+            
+            // Show placeholder if empty
+            if (gameState.builtSentence.length === 0) {
+                const placeholder = document.getElementById('placeholder');
+                if (placeholder) placeholder.style.display = 'block';
+            }
+            
+            updateCheckButton();
+            playSound('drag');
+        }
+
+        function updateCheckButton() {
+            const checkBtn = document.getElementById('checkBtn');
+            checkBtn.disabled = gameState.builtSentence.length === 0;
+        }
+
+        function checkSentence() {
+            const current = challenges[gameState.currentChallenge];
+            const built = gameState.builtSentence.join('').replace(/-/g, '');
+            const target = current.target;
+            
+            gameState.totalAttempts++;
+            
+            if (built === target) {
+                handleCorrectAnswer(current);
+            } else {
+                handleIncorrectAnswer(current, built);
+            }
+        }
+
+        function handleCorrectAnswer(challenge) {
+            gameState.correctAttempts++;
+            gameState.streak++;
+            gameState.combo++;
+            
+            // Award gems with combo
+            const baseGems = challenge.gems;
+            const comboBonus = Math.min(gameState.combo - 1, 5) * 2;
+            const totalGems = baseGems + comboBonus;
+            gameState.gems += totalGems;
+            
+            // Update UI
+            updateStats();
+            
+            // Show combo
+            if (gameState.combo > 1) {
+                const comboEl = document.getElementById('comboDisplay');
+                document.getElementById('comboValue').textContent = gameState.combo;
+                comboEl.classList.add('active');
+                setTimeout(() => comboEl.classList.remove('active'), 2000);
+            }
+            
+            // Show feedback
+            const modal = document.getElementById('feedbackModal');
+            const title = document.getElementById('feedbackTitle');
+            const explanation = document.getElementById('feedbackExplanation');
+            
+            title.textContent = '✅ Correct!';
+            explanation.innerHTML = `<strong>${challenge.english}</strong><br><br>${challenge.explanation}<br><br>+${totalGems} 💎`;
+            
+            modal.classList.remove('incorrect');
+            modal.classList.add('correct', 'show');
+            
+            playSound('correct');
+        }
+
+        function handleIncorrectAnswer(challenge, built) {
+            gameState.streak = 0;
+            gameState.combo = 0;
+            gameState.hearts--;
+            
+            // Update UI
+            updateStats();
+            
+            // Show feedback
+            const modal = document.getElementById('feedbackModal');
+            const title = document.getElementById('feedbackTitle');
+            const explanation = document.getElementById('feedbackExplanation');
+            
+            title.textContent = '❌ Not quite right';
+            explanation.innerHTML = `You built: <strong>${built || '(empty)'}</strong><br>
+                                   Correct answer: <strong>${challenge.target}</strong><br><br>
+                                   ${challenge.explanation}`;
+            
+            modal.classList.remove('correct');
+            modal.classList.add('incorrect', 'show');
+            
+            playSound('incorrect');
+            
+            // Check if out of hearts
+            if (gameState.hearts <= 0) {
+                setTimeout(() => {
+                    alert('Out of hearts! Game over.');
+                    resetGame();
+                }, 2000);
+            }
+        }
+
+        function showHint() {
+            const current = challenges[gameState.currentChallenge];
+            const hintDisplay = document.getElementById('hintDisplay');
+            
+            hintDisplay.innerHTML = `<strong>💡 Hint:</strong> "${current.english}" needs these parts:<br>
+                                     ${current.required.join(' + ')}<br>
+                                     Remember: Subject + Tense + (Object) + Verb`;
+            hintDisplay.classList.add('show');
+            
+            // Deduct gems for hint
+            gameState.gems = Math.max(0, gameState.gems - 5);
+            updateStats();
+            
+            // Hide hint after 5 seconds
+            setTimeout(() => {
+                hintDisplay.classList.remove('show');
+                setTimeout(() => hintDisplay.innerHTML = '', 300);
+            }, 5000);
+        }
+
+        function skipChallenge() {
+            gameState.combo = 0;
+            gameState.hearts--;
+            updateStats();
+            
+            if (gameState.hearts <= 0) {
+                alert('Out of hearts! Game over.');
+                resetGame();
+            } else {
+                nextChallenge();
+            }
+        }
+
+        function continueToNext() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.classList.remove('correct', 'incorrect');
+                nextChallenge();
+            }, 300);
+        }
+
+        function nextChallenge() {
+            if (gameState.currentChallenge < challenges.length - 1) {
+                gameState.currentChallenge++;
+            } else {
+                // Level complete
+                alert(`Level Complete! 🎉\nTotal Gems: ${gameState.gems}\nAccuracy: ${Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100)}%`);
+                gameState.currentChallenge = 0;
+            }
+            
+            resetSentence();
+            loadChallenge();
+        }
+
+        function resetSentence() {
+            gameState.builtSentence = [];
+            gameState.sentenceTypes = [];
+            
+            const workspace = document.getElementById('sentenceWorkspace');
+            workspace.innerHTML = '<div class="sentence-placeholder" id="placeholder">Drag morphemes here to build your sentence</div>';
+            
+            const hintDisplay = document.getElementById('hintDisplay');
+            hintDisplay.classList.remove('show');
+            hintDisplay.innerHTML = '';
+            
+            updateCheckButton();
+        }
+
+        function loadChallenge() {
+            const current = challenges[gameState.currentChallenge];
+            document.getElementById('challengeText').textContent = `"${current.english}"`;
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('hearts').textContent = gameState.hearts;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('gems').textContent = gameState.gems;
+            
+            // Update progress
+            const progress = ((gameState.currentChallenge + 1) / challenges.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function resetGame() {
+            gameState = {
+                currentChallenge: 0,
+                builtSentence: [],
+                sentenceTypes: [],
+                streak: 0,
+                hearts: 5,
+                gems: 0,
+                combo: 0,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                soundEnabled: true
+            };
+            
+            resetSentence();
+            loadChallenge();
+        }
+
+        // Initialize
+        loadChallenge();
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('checkBtn').disabled) {
+                checkSentence();
+            } else if (e.key === 'h' || e.key === 'H') {
+                showHint();
+            }
+        });
+    </script>
+</body>
+</html>
